@@ -2,6 +2,7 @@
 package edu.mills.cs180a.classfeedback;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -49,7 +50,7 @@ public class CommentActivity extends Activity {
                 EditText commentField = (EditText) findViewById(R.id.commentEditText);
                 cds.createComment(Person.everyone[recipient].getEmail(),
                         commentField.getText().toString());
-                setResult(RESULT_OK);
+                setResult(RESULT_OK, new Intent().putExtra(RECIPIENT, recipient));
                 finish();
             }
         });
@@ -57,7 +58,7 @@ public class CommentActivity extends Activity {
         cancelButton.setOnClickListener(new OnClickListener(){
             @Override
             public void onClick(View view) {
-                setResult(RESULT_CANCELED);
+                setResult(RESULT_CANCELED, new Intent().putExtra(RECIPIENT, recipient));
                 finish();
             }
         });

@@ -9,4 +9,7 @@
     <string name="clear_text_button">Clear Text</string>
     <string name="title_activity_comment">Comment Activity</string>
     <string name="comment_image_content_description">Image of recipient of comment</string>
+    <string name="comment_added_toast">Comment added for %s</string>
+    <string name="comment_canceled_toast">Comment canceled for %s</string>
+    <string name="unknown_name_text">Unknown</string>
 </resources>

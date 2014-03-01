@@ -5,7 +5,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.util.Log;
 
 /**
  * Creates and upgrades a database for storing {@link Comment}s.
@@ -68,21 +67,14 @@ public class MySQLiteOpenHelper extends SQLiteOpenHelper {
         db.execSQL(DATABASE_CREATE);
     }
 
-    private static final String TAG = "MySQLiteOpenHelper";
-
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        Log.d(TAG, "upgrading database from version " + oldVersion + " to version " + newVersion);
         String tmpCommentsTable = TABLE_COMMENTS + "_tmp";
-        Log.d(TAG, "temp comments table name is: " + tmpCommentsTable);
         // Rename the old comments table.
-        String sql = "alter table " + TABLE_COMMENTS + " rename to " + tmpCommentsTable + ";";
-        Log.d(TAG, "Renamed old comments table: " + sql);
-        db.execSQL(sql);
+        db.execSQL("alter table " + TABLE_COMMENTS + " rename to " + tmpCommentsTable + ";");
 
         // Create the new comments table.
         onCreate(db);
-        Log.d(TAG, "Created the new comments table: " + DATABASE_CREATE);
 
         // Populate the new comments table with the contents of the old comments table. If there are
         // multiple comments associated with an e-mail, concatenate them, separating the comments
@@ -98,15 +90,11 @@ public class MySQLiteOpenHelper extends SQLiteOpenHelper {
             String content = cursor.getString(1);
             values.put(COLUMN_RECIPIENT, recipient);
             values.put(COLUMN_CONTENT, content);
-            long insertId = db.insert(MySQLiteOpenHelper.TABLE_COMMENTS, null, values);
-            Log.d(TAG, "Inserted comment " + insertId + " to " + recipient + ": "
-                    + content);
+            db.insert(MySQLiteOpenHelper.TABLE_COMMENTS, null, values);
             cursor.moveToNext();
         }
         cursor.close();
 
-        sql = "DROP TABLE " + tmpCommentsTable + ";";
-        Log.d(TAG, "delete old (temp) comments table: " + sql);
-        db.execSQL(sql);
+        db.execSQL("DROP TABLE " + tmpCommentsTable + ";");
     }
 }

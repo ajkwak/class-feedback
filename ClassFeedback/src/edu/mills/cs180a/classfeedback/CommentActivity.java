@@ -42,12 +42,18 @@ public class CommentActivity extends Activity {
         final CommentsDataSource cds = new CommentsDataSource(this);
         cds.open();
 
+        // Set the text of the comment EditText to the value of the current comment, if any.
+        final EditText commentField = (EditText) findViewById(R.id.commentEditText);
+        Comment comment = cds.getCommentForRecipient(person.getEmail(), null);
+        if (comment != null && comment.getContent() != null) {
+            commentField.setText(comment.getContent());
+        }
+
         // Add listeners.
         Button saveButton = (Button) findViewById(R.id.saveCommentButton);
         saveButton.setOnClickListener(new OnClickListener(){
             @Override
             public void onClick(View view) {
-                EditText commentField = (EditText) findViewById(R.id.commentEditText);
                 cds.createComment(Person.everyone[recipient].getEmail(),
                         commentField.getText().toString());
                 setResult(RESULT_OK, new Intent().putExtra(RECIPIENT, recipient));
@@ -66,8 +72,7 @@ public class CommentActivity extends Activity {
         clearTextButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View arg0) {
-                EditText commentEditText = (EditText) findViewById(R.id.commentEditText);
-                commentEditText.setText("");
+                commentField.setText("");
             }
         });
     }

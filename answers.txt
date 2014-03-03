@@ -1,0 +1,38 @@
+AJ Parmidge
+Mobile App Development
+Ellen Spertus
+Lab 5: SQLite
+2 March 2014
+
+NOTE # 1: To see the non-plaintext version of this file (this is necessary in
+order to see the text case information), go to:
+https://docs.google.com/a/mills.edu/document/d/1VRbWDwqDElHeTo89l8V1MEXWBxNjetPtvZ-BVO4Wls0/edit
+
+NOTE: I worked alone on this lab.
+
+REFLECTIONS
+
+I enjoyed this lab.  It took me rather longer than previous labs have, both to
+understand and to execute the content of the lab.  It was fun learning android’s
+wrapper methods for the SQLite database, although it was also frustrating in
+some ways, since I knew exactly what the SQL query or insertion or update
+statement needed to be (like when I was upgrading the database to the new
+version), but I couldn’t (or rather shouldn’t) write it directly, and so had to
+use the android wrapper methods.  Still, all in all, quite fun.
+
+With regard to the createComment() method in CommentDataSource, I really wasn’t
+sure how I wanted to implement this.  I could a) query the database to see if a
+comment already existed for the given recipient’s email, and if not, then update
+the current record for that user with the new comment text, and if so, then add
+a record for that user with the new comment text, or b) try to insert the
+comment and if the insert failed (i.e. if the insert returned -1) then update
+the comment.  I ended up choosing the latter because it required fewer SQL
+queries on the database.  I’m really ambivalent as to whether this was the right
+decision, since the unsuccessful inserts also generate error messages in the log
+(but don’t actually throw exceptions, so don’t cause the program to stop).
+
+TEST CASES
+
+These test cases include images, and so can't be included in this plaintext
+file.  Please see:
+https://docs.google.com/a/mills.edu/document/d/1VRbWDwqDElHeTo89l8V1MEXWBxNjetPtvZ-BVO4Wls0/edit

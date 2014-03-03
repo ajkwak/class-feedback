@@ -17,7 +17,7 @@ import android.widget.Toast;
 /**
  * An {@code Activity} that enables the user to pick a contact, then retrieve
  * comments meant for the contact.
- * 
+ *
  * @author ellen.spertus@gmail.com (Ellen Spertus)
  */
 public class MainActivity extends Activity {
@@ -28,12 +28,12 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        
+
         Button fetchOneButton = (Button) findViewById(R.id.fetchOneButton);
         fetchOneButton.setOnClickListener(new OnClickListener(){
             @Override
             public void onClick(View view) {
-                Intent i = new Intent(Intent.ACTION_PICK, 
+                Intent i = new Intent(Intent.ACTION_PICK,
                         ContactsContract.Contacts.CONTENT_URI);
                 startActivityForResult(i, PICK_REQUEST);
             }
@@ -54,7 +54,7 @@ public class MainActivity extends Activity {
 
         // Now that we have an id, we can request the email address.
         Cursor emailsCursor = getContentResolver().query(
-                ContactsContract.CommonDataKinds.Email.CONTENT_URI, null, 
+                ContactsContract.CommonDataKinds.Email.CONTENT_URI, null,
                 ContactsContract.CommonDataKinds.Email.CONTACT_ID + "=" + contactId,
                 null, null);
 
@@ -70,7 +70,7 @@ public class MainActivity extends Activity {
             email = "";
             Log.w(TAG, "No email address found for contact.");
         }
-        
+
         // Clean up before returning.
         contactCursor.close();
         emailsCursor.close();
@@ -93,9 +93,24 @@ public class MainActivity extends Activity {
                 Log.e(TAG, "Cursor returned by content resolver is null.");
                 return;
             }
-            while (cursor.moveToNext()) {
+            if (cursor.moveToNext()) {
                 String s = cursor.getString(0);
-                Log.d(TAG, "Found comment: " + s);
+                if (!cursor.isLast()) { // Then this recipient has more than one comment.
+                    StringBuilder errorMsgBuilder = new StringBuilder("Recipient ")
+                            .append(email)
+                            .append(" has more than one comment!  Comments for this recipient are: 1) ")
+                            .append(s);
+                    int commentIdx = 2;
+                    while (cursor.moveToNext()) {
+                        s = cursor.getString(0);
+                        errorMsgBuilder.append(' ').append(commentIdx).append(") ").append(s);
+                        commentIdx++;
+                    }
+                    String errorMsg = errorMsgBuilder.toString();
+                    Log.e(TAG, errorMsg);
+                    throw new IllegalStateException(errorMsg);
+                }
+                Toast.makeText(this, "Found comment: " + s, Toast.LENGTH_LONG).show();
             }
             cursor.close();
         } else {

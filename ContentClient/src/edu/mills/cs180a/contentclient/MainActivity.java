@@ -89,7 +89,10 @@ public class MainActivity extends Activity {
             Uri uri = Uri.parse(CommentContentProvider.CONTENT_URI + "/" + email);
             String[] projection = { "content" };  // desired columns
             Cursor cursor = resolver.query(uri, projection, null, null, null);
-            assert(cursor != null);
+            if (cursor == null) {
+                Log.e(TAG, "Cursor returned by content resolver is null.");
+                return;
+            }
             while (cursor.moveToNext()) {
                 String s = cursor.getString(0);
                 Log.d(TAG, "Found comment: " + s);

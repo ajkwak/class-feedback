@@ -1,13 +1,15 @@
-/**
- * 
- */
 package edu.mills.cs180a.contentclient;
 
 import android.net.Uri;
 
 /**
- * @author Ellen
- *
+ * A copy of needed constants defined in 
+ * {@link edu.mills.cs180a.classfeedback.CommentContentProvider}.  This duplication
+ * is to avoid the inconvenience of exporting them through a jar file.  For more
+ * information, see <a href="http://stackoverflow.com/questions/21978082">How
+ * to share public URIs for ContentProvider</a>.
+ * 
+ * @author ellen.spertus@gmail.com (Ellen Spertus)
  */
 public class CommentContentProvider {
     // Copied from the content provider.

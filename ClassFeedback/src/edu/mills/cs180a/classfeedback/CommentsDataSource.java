@@ -150,6 +150,19 @@ public class CommentsDataSource {
         return comment;
     }
 
+    /**
+     * Deletes the comment associated with the given recipient in the database.
+     *
+     * @param comment the email address of the target of the comment to delete
+     * @return {@code true} if the comment was successfully deleted from the database; otherwise
+     *         {@code false}
+     */
+    boolean deleteCommentForRecipient(String recipient) {
+        int deletedRecordId = database.delete(MySQLiteOpenHelper.TABLE_COMMENTS,
+                MySQLiteOpenHelper.COLUMN_RECIPIENT + " = '" + recipient + "'", null);
+        return deletedRecordId != -1;
+    }
+
     private Comment cursorToComment(Cursor cursor) {
         Comment comment = new Comment(
                 cursor.getLong(MySQLiteOpenHelper.COLUMN_ID_POS),

@@ -5,11 +5,17 @@
     <string name="row_image_content_description">Image of person named on row</string>
     <string name="comment_button">Comment</string>
     <string name="save_button">Save</string>
+    <string name="delete_button">Delete</string>
+    <string name="mail_button">Mail</string>
     <string name="cancel_button">Cancel</string>
-    <string name="clear_text_button">Clear Text</string>
+    <string name="clear_text_button">Start Over</string>
+    <string name="yes_button">Yes</string>
+    <string name="no_button">No</string>
     <string name="title_activity_comment">Comment Activity</string>
     <string name="comment_image_content_description">Image of recipient of comment</string>
-    <string name="comment_added_toast">Comment added for %s</string>
+    <string name="comment_altered_toast">Comment %1$s for %2$s</string>
+    <string name="added_text">saved</string>
+    <string name="deleted_text">deleted</string>
     <string name="comment_canceled_toast">Comment canceled for %s</string>
-    <string name="unknown_name_text">Unknown</string>
+    <string name="verify_delete_comment_text">Do you want to delete this comment now?</string>
 </resources>

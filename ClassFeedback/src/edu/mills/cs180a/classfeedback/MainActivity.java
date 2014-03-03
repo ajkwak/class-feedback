@@ -40,24 +40,23 @@ public class MainActivity extends Activity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        // Determine whether the comment was added or canceled.
-        String toastText = "";
-        if (resultCode == RESULT_OK) {
-            toastText = getString(R.string.comment_added_toast);
-        } else if (resultCode == RESULT_CANCELED) {
-            toastText = getString(R.string.comment_canceled_toast);
-        }
-
-        // Add the name of the person for whom the comment was added or canceled.
-        if (data != null) {
+        if(data != null){
+            // Make a toast informing the user of what has occurred.
+            String toastText = "";
             int recipientId = data.getIntExtra(CommentActivity.RECIPIENT, -1);
-            assert (recipientId >= 0 && recipientId < Person.everyone.length);
-            toastText = String.format(toastText, Person.everyone[recipientId].toString());
-        } else {
-            toastText = String.format(toastText, getString(R.string.unknown_name_text));
-        }
+            String recipient = Person.everyone[recipientId].toString();
+            if (resultCode == RESULT_OK) {
+                toastText = getString(R.string.comment_altered_toast);
+                int actionId = data.getIntExtra(CommentActivity.ACTION, -1);
+                String action = getString(actionId);
+                toastText = String.format(toastText, action, recipient);
+            } else if (resultCode == RESULT_CANCELED) {
+                toastText = getString(R.string.comment_canceled_toast);
+                toastText = String.format(toastText, recipient);
+            }
 
-        Toast.makeText(this, toastText, Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, toastText, Toast.LENGTH_SHORT).show();
+        }
     }
 
     private class OnItemClickListener implements OnClickListener{

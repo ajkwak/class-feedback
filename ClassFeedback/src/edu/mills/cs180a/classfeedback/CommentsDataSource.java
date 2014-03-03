@@ -53,13 +53,14 @@ public class CommentsDataSource {
     }
 
     /**
-     * Creates a comment with the specified content for the specified recipient.
-     * This both adds the comment to the database and constructs a {@link Comment}
-     * instance.
+     * Creates a comment with the specified content for the specified recipient. If the recipient
+     * has no associated comment, this adds the comment to the database. If the recipient already
+     * has an associated comment, this replaces the comment in the database for that recipient. This
+     * method also then constructs a new {@link Comment} instance with the given information.
      *
      * @param recipient the email address of the recipient
      * @param content the content of the comment
-     * @return a new {@link Comment} instance
+     * @return a new {@link Comment} instance for the given recipient with the given content
      */
     Comment createComment(String recipient, String content) {
         if (database == null) {
@@ -82,13 +83,13 @@ public class CommentsDataSource {
     }
 
     /**
-     * Queries the database for all comments for the specified recipient.
-     *
+     * Queries the database for the comment associated with the specified recipient.
+     * 
      * @param recipient the email address of the target of the comment
      * @param projection the names of the columns to retrieve
-     * @return a {@code Cursor} pointing to all comments for the recipient
+     * @return a {@code Cursor} pointing to the comment for the recipient (if any)
      */
-    Cursor getCursorForCommentsForRecipient(String recipient, String[] projection) {
+    Cursor getCursorForCommentForRecipient(String recipient, String[] projection) {
         if (database == null) {
             open();
         }
@@ -138,7 +139,7 @@ public class CommentsDataSource {
      * @return the comment associated with the given recipient in the database
      */
     Comment getCommentForRecipient(String recipient, String[] projection) {
-        Cursor cursor = getCursorForCommentsForRecipient(recipient, projection);
+        Cursor cursor = getCursorForCommentForRecipient(recipient, projection);
         cursor.moveToFirst();
         Comment comment = null;
         if (!cursor.isAfterLast()) { // Then the given recipient is associated with a comment.

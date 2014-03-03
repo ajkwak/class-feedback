@@ -43,7 +43,7 @@ public class CommentContentProvider extends ContentProvider {
                 break;
             case COMMENTS_EMAIL:
                 Log.d(TAG, "In CommentContentProvider.query(), uri is COMMENTS_EMAIL");
-                cursor = cds.getCursorForCommentsForRecipient(uri.getLastPathSegment(), projection);
+                cursor = cds.getCursorForCommentForRecipient(uri.getLastPathSegment(), projection);
                 break;
             default:
                 Log.d(TAG, "In CommentContentProvider.query(), uri is not matched: " + uri);

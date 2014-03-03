@@ -19,6 +19,7 @@ import android.widget.Toast;
  * comments meant for the contact.
  *
  * @author ellen.spertus@gmail.com (Ellen Spertus)
+ * @author ajkwak@users.noreply.github.com (AJ Parmidge)
  */
 public class MainActivity extends Activity {
     private static final int PICK_REQUEST = 1;

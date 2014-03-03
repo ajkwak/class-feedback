@@ -26,6 +26,7 @@ import android.widget.Toast;
  * the result code {@link Activity#RESULT_CANCELED} is provided.
  *
  * @author ellen.spertus@gmail.com (Ellen Spertus)
+ * @author ajkwak@users.noreply.github.com (AJ Parmidge)
  */
 public class CommentActivity extends Activity {
     static final String RECIPIENT = "COMMENT_RECIPIENT";

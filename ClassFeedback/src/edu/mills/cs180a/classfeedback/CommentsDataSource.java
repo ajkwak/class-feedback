@@ -18,6 +18,7 @@ import android.util.Log;
  * Android SQLite database and content provider - Tutorial</a> by Lars Vogella.
  *
  * @author ellen.spertus@gmail.com (Ellen Spertus)
+ * @author ajkwak@users.noreply.github.com (AJ Parmidge)
  */
 public class CommentsDataSource {
     private static final String TAG = "CommentsDataSource";

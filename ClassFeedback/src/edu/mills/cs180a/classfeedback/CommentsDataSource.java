@@ -84,7 +84,7 @@ public class CommentsDataSource {
 
     /**
      * Queries the database for the comment associated with the specified recipient.
-     * 
+     *
      * @param recipient the email address of the target of the comment
      * @param projection the names of the columns to retrieve
      * @return a {@code Cursor} pointing to the comment for the recipient (if any)
@@ -153,8 +153,8 @@ public class CommentsDataSource {
 
     /**
      * Deletes the comment associated with the given recipient in the database.
-     *
-     * @param comment the email address of the target of the comment to delete
+     * 
+     * @param recipient the email address of the target of the comment to delete
      * @return {@code true} if the comment was successfully deleted from the database; otherwise
      *         {@code false}
      */

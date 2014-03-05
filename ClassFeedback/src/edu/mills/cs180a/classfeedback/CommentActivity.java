@@ -1,4 +1,3 @@
-
 package edu.mills.cs180a.classfeedback;
 
 import android.app.Activity;
@@ -8,6 +7,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -26,11 +26,12 @@ import android.widget.Toast;
  * the result code {@link Activity#RESULT_CANCELED} is provided.
  *
  * @author ellen.spertus@gmail.com (Ellen Spertus)
- * @author ajkwak@users.noreply.github.com (AJ Parmidge)
  */
 public class CommentActivity extends Activity {
-    static final String RECIPIENT = "COMMENT_RECIPIENT";
-    static final String ACTION = "COMMENT_ACTION";
+    private static final String TAG = "CommentActivity";
+    public static final String RECIPIENT = "COMMENT_RECIPIENT";
+    public static final String ACTION = "COMMENT_ACTION";
+    public static final String CDS_FACTORY = "CDS_FACTORY";
     private int recipient;
     private CommentsDataSource cds;
     private EditText commentField;
@@ -48,12 +49,14 @@ public class CommentActivity extends Activity {
         icon.setImageResource(person.getImageId());
 
         // Get a connection to the database.
-        cds = new CommentsDataSource(this);
+        CommentsDataSourceAbstractFactory factory =
+                (CommentsDataSourceAbstractFactory) getIntent().getSerializableExtra(CDS_FACTORY);
+        cds = factory.createCommentsDataSource(this);
         cds.open();
 
         // Set the text of the comment EditText to the value of the current comment, if any.
         commentField = (EditText) findViewById(R.id.commentEditText);
-        Comment comment = cds.getCommentForRecipient(person.getEmail(), null);
+        Comment comment = cds.getCommentForRecipient(person.getEmail());
         if (comment != null && comment.getContent() != null) {
             commentField.setText(comment.getContent());
         }
@@ -99,7 +102,14 @@ public class CommentActivity extends Activity {
         });
     }
 
+
     private void saveComment() {
+        Log.d(TAG, "saveComment()");
+        Log.d(TAG, "recipient = " + recipient);
+        String recipientEmail = Person.everyone[recipient].getEmail();
+        Log.d(TAG, "recipient email = " + recipientEmail);
+        Log.d(TAG, "commentField = " + commentField);
+        Log.d(TAG, "commentField text = " + commentField.getText());
         cds.createComment(Person.everyone[recipient].getEmail(), commentField.getText().toString());
         Intent intent = new Intent()
                 .putExtra(RECIPIENT, recipient)
@@ -150,3 +160,4 @@ public class CommentActivity extends Activity {
         }
     }
 }
+

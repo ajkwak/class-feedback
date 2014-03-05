@@ -61,13 +61,14 @@ public class MainActivity extends Activity {
 
     private class OnItemClickListener implements OnClickListener{
         private int mPosition;
-        OnItemClickListener(int position){
+        OnItemClickListener(int position) {
             mPosition = position;
         }
         @Override
         public void onClick(View arg0) {
             Intent i = new Intent(MainActivity.this, CommentActivity.class);
             i.putExtra(CommentActivity.RECIPIENT, mPosition);
+            i.putExtra(CommentActivity.CDS_FACTORY, new CommentsDataSourceFactory());
             startActivityForResult(i, mPosition);
         }
     }

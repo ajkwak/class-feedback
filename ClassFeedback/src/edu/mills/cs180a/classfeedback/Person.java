@@ -6,7 +6,10 @@ package edu.mills.cs180a.classfeedback;
  * @author ellen.spertus@gmail.com (Ellen Spertus)
  */
 public class Person {
-    static final Person[] everyone = {
+    /**
+     * Everyone known to be in CS 180A: Mobile Application Development.
+     */
+    public static final Person[] everyone = {
         new Person("AJ", "Parmidge", "aparmidge@mills.edu", R.drawable.aj),
         new Person("Caroline", "Taymor", "ctaymor@gmail.com", R.drawable.caroline),
         new Person("Ching", "Yu", "cyu@mills.edu", R.drawable.ching),

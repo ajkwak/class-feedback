@@ -8,8 +8,18 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.util.Log;
 
+/**
+ * A content provider for comments meant for specified individuals,
+ * backed by {@link CommentsDataSource}.
+ * 
+ * @author ellen.spertus@gmail.com (Ellen Spertus)
+ */
 public class CommentContentProvider extends ContentProvider {
     private static final String TAG = "CommentContentProvider";
+    /**
+     * The authority for this content provider.  This must appear in this
+     * application's AndroidManifest.xml and in request URLs from clients.
+     */
     public static final String AUTHORITY = "edu.mills.cs180a.classfeedback";
     private static final String BASE_PATH = "comments";
     public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY
@@ -20,7 +30,9 @@ public class CommentContentProvider extends ContentProvider {
     private static final int COMMENTS_EMAIL = 2;
     private static final UriMatcher sURIMatcher = new UriMatcher(UriMatcher.NO_MATCH);
     static {
+        // Get all comments.
         sURIMatcher.addURI(AUTHORITY, BASE_PATH, COMMENTS);
+        // Get all comments for a specific email address.
         sURIMatcher.addURI(AUTHORITY, BASE_PATH + "/*", COMMENTS_EMAIL);
     }
 
@@ -33,6 +45,7 @@ public class CommentContentProvider extends ContentProvider {
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs,
             String sortOrder) {
         Log.d(TAG, "In CommentContentProvider.query()");
+        Log.d(TAG, "In CommentContentProvider, getContext().toString(): " + getContext().toString());
         CommentsDataSource cds = new CommentsDataSource(getContext());
         cds.open();
         Cursor cursor = null;
@@ -81,5 +94,4 @@ public class CommentContentProvider extends ContentProvider {
     public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
         throw new UnsupportedOperationException("update not supported");
     }
-
 }

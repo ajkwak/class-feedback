@@ -60,7 +60,19 @@ public class CommentsDataSource {
         database.close();
         dbHelper.close();
     }
-
+    
+    /**
+     * Deletes the specified comments.
+     * 
+     * @param selection which comments to delete (as a SQL where clause), or {@code null},
+     *     to delete all comments
+     * @param selectionArgs values for arguments in {@code selection}
+     * @return the number of rows deleted
+     */
+    public int delete(String selection, String[] selectionArgs) {
+        return database.delete(MySQLiteOpenHelper.TABLE_COMMENTS, selection, selectionArgs);
+    }
+    
     /**
      * Creates a comment with the specified content for the specified recipient.
      * This both adds the comment to the database and constructs a {@link Comment}

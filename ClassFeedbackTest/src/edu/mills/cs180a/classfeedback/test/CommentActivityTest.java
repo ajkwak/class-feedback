@@ -1,6 +1,3 @@
-/**
- *
- */
 package edu.mills.cs180a.classfeedback.test;
 
 import android.content.Intent;

@@ -70,11 +70,6 @@ public class CommentActivityTest extends ActivityInstrumentationTestCase2<Commen
 				mImageView.getDrawable().getConstantState());
 	}
 
-	// Make sure that the comment field is initially empty.
-	public void testCommentFieldEmpty() {
-		assertEquals(0, mCommentField.getText().length());
-	}
-
 	private int getNumCommentsForRecipient(Person recipient) {
 		Cursor cursor = mCds.getCursorForCommentForRecipient(
 				recipient.getEmail(), null);

@@ -70,7 +70,7 @@ public class CommentsDataSource {
      * @param content the content of the comment
      * @return a new {@link Comment} instance
      */
-    Comment createComment(String recipient, String content) {
+    public Comment createComment(String recipient, String content) {
         if (database == null) {
             open();
         }
@@ -104,7 +104,7 @@ public class CommentsDataSource {
      * @param projection the names of the columns to retrieve
      * @return a {@code Cursor} referencing all comments in the database
      */
-    Cursor getCursorForAllComments(String[] projection) {
+    public Cursor getCursorForAllComments(String[] projection) {
         if (database == null) {
             open();
         }
@@ -117,7 +117,7 @@ public class CommentsDataSource {
      *
      * @return all comments in the database
      */
-    List<Comment> getAllComments() {
+    public List<Comment> getAllComments() {
         List<Comment> comments = new ArrayList<Comment>();
 
         Cursor cursor = getCursorForAllComments(null);
@@ -139,7 +139,7 @@ public class CommentsDataSource {
      * @param projection the names of the columns to retrieve
      * @return the comment associated with the given recipient in the database
      */
-    Comment getCommentForRecipient(String recipient) {
+    public Comment getCommentForRecipient(String recipient) {
         Cursor cursor = getCursorForCommentForRecipient(recipient, null);
         cursor.moveToFirst();
         Comment comment = null;
@@ -154,12 +154,12 @@ public class CommentsDataSource {
 
     /**
      * Deletes the comment associated with the given recipient in the database.
-     * 
+     *
      * @param recipient the email address of the target of the comment to delete
      * @return {@code true} if the comment was successfully deleted from the database; otherwise
      *         {@code false}
      */
-    boolean deleteCommentForRecipient(String recipient) {
+    public boolean deleteCommentForRecipient(String recipient) {
         int deletedRecordId = database.delete(MySQLiteOpenHelper.TABLE_COMMENTS,
                 MySQLiteOpenHelper.COLUMN_RECIPIENT + " = '" + recipient + "'", null);
         return deletedRecordId != -1;

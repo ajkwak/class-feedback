@@ -1,24 +1,24 @@
 /**
- * 
+ *
  */
 package edu.mills.cs180a.classfeedback;
 
 /**
  * A comment meant for a classmate.
- * 
+ *
  * @author ellen.spertus@gmail.com (Ellen Spertus)
  */
 public class Comment {
     private long mId;
     private String mRecipient;
     private String mContent;
-    
-    Comment(long id, String recipient, String content) {
+
+    public Comment(long id, String recipient, String content) {
         mId = id;
         mRecipient = recipient;
         mContent = content;
     }
-    
+
     /**
      * Gets the email address of the recipient.
      *
@@ -27,7 +27,7 @@ public class Comment {
     String getRecipient() {
         return mRecipient;
     }
-    
+
     /**
      * Sets the email address of the recipient.
      *
@@ -36,7 +36,7 @@ public class Comment {
     void setRecipient(String recipient) {
         mRecipient = recipient;
     }
-    
+
     /**
      * Gets the content of the comment.
      *
@@ -45,7 +45,7 @@ public class Comment {
     String getContent() {
         return mContent;
     }
-    
+
     /**
      * Sets the content of the comment.
      *
@@ -54,7 +54,7 @@ public class Comment {
     void setContent(String content) {
         mContent = content;
     }
-    
+
     /**
      * Gets the unique id of this comment.
      *

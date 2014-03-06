@@ -24,7 +24,7 @@ public class Comment {
      *
      * @return the email address of the recipient
      */
-    String getRecipient() {
+    public String getRecipient() {
         return mRecipient;
     }
 
@@ -42,7 +42,7 @@ public class Comment {
      *
      * @return the content
      */
-    String getContent() {
+    public String getContent() {
         return mContent;
     }
 

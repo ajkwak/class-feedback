@@ -1,8 +1,6 @@
 package edu.mills.cs180a.classfeedback;
 
-import android.content.ContentValues;
 import android.content.Context;
-import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
@@ -30,7 +28,7 @@ public class MySQLiteOpenHelper extends SQLiteOpenHelper {
      * The name of the column containing the index of the recipient in
      * {@link Person#everyone}.
      */
-    static final String COLUMN_RECIPIENT = "recipient";
+    public static final String COLUMN_RECIPIENT = "recipient";
 
     /**
      * The name of the column containing the comment's content.
@@ -61,11 +59,11 @@ public class MySQLiteOpenHelper extends SQLiteOpenHelper {
     public MySQLiteOpenHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
-    
+
     public MySQLiteOpenHelper(Context context, String name) {
         super(context, name, null, DATABASE_VERSION);
     }
-    
+
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(DATABASE_CREATE);

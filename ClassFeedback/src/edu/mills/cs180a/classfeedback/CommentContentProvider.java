@@ -11,7 +11,7 @@ import android.util.Log;
 /**
  * A content provider for comments meant for specified individuals,
  * backed by {@link CommentsDataSource}.
- * 
+ *
  * @author ellen.spertus@gmail.com (Ellen Spertus)
  */
 public class CommentContentProvider extends ContentProvider {
@@ -69,7 +69,7 @@ public class CommentContentProvider extends ContentProvider {
     }
 
     @Override
-    public int delete(Uri arg0, String arg1, String[] arg2) {
+    public int delete(Uri uri, String selection, String[] selectionArgs) {
         throw new UnsupportedOperationException("delete not supported");
     }
 
@@ -87,7 +87,22 @@ public class CommentContentProvider extends ContentProvider {
 
     @Override
     public Uri insert(Uri uri, ContentValues values) {
-        throw new UnsupportedOperationException("insert not supported");
+        CommentsDataSource cds = new CommentsDataSource(getContext());
+        if (sURIMatcher.match(uri) == COMMENTS_EMAIL) {
+            Log.d(TAG, "In CommentContentProvider.insert(), uri is COMMENTS_EMAIL");
+            cds.open();
+            Comment insertedComment = cds.createComment(
+                    values.getAsString(MySQLiteOpenHelper.COLUMN_RECIPIENT),
+                    values.getAsString(MySQLiteOpenHelper.COLUMN_CONTENT));
+            if(insertedComment == null){
+                return null;
+            }
+            // Notify anyone listening on the URI.
+            getContext().getContentResolver().notifyChange(uri, null);
+            return uri;
+        }
+        Log.d(TAG, "In CommentContentProvider.insert(), uri is not matched: " + uri);
+        throw new IllegalArgumentException("Illegal uri: " + uri);
     }
 
     @Override

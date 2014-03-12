@@ -5,6 +5,7 @@ import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.UriMatcher;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.util.Log;
 
@@ -69,6 +70,24 @@ public class CommentContentProvider extends ContentProvider {
     }
 
     @Override
+    public Uri insert(Uri uri, ContentValues values) {
+        if (sURIMatcher.match(uri) == COMMENTS_EMAIL) {
+            Log.d(TAG, "In CommentContentProvider.insert(), uri is COMMENTS_EMAIL");
+            MySQLiteOpenHelper dbHelper = new MySQLiteOpenHelper(getContext());
+            SQLiteDatabase database = dbHelper.getWritableDatabase();
+            long insertId = database.insert(MySQLiteOpenHelper.TABLE_COMMENTS, null, values);
+            if (insertId == -1) { // Then error occurred during insertion.
+                return null;
+            }
+            // Notify anyone listening on the URI.
+            getContext().getContentResolver().notifyChange(uri, null);
+            return uri;
+        }
+        Log.d(TAG, "In CommentContentProvider.insert(), uri is not matched: " + uri);
+        throw new IllegalArgumentException("Illegal uri: " + uri);
+    }
+
+    @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
         throw new UnsupportedOperationException("delete not supported");
     }
@@ -83,26 +102,6 @@ public class CommentContentProvider extends ContentProvider {
                 Log.e(TAG, "Unrecognized uri: " + uri);
                 return null;
         }
-    }
-
-    @Override
-    public Uri insert(Uri uri, ContentValues values) {
-        CommentsDataSource cds = new CommentsDataSource(getContext());
-        if (sURIMatcher.match(uri) == COMMENTS_EMAIL) {
-            Log.d(TAG, "In CommentContentProvider.insert(), uri is COMMENTS_EMAIL");
-            cds.open();
-            Comment insertedComment = cds.createComment(
-                    values.getAsString(MySQLiteOpenHelper.COLUMN_RECIPIENT),
-                    values.getAsString(MySQLiteOpenHelper.COLUMN_CONTENT));
-            if(insertedComment == null){
-                return null;
-            }
-            // Notify anyone listening on the URI.
-            getContext().getContentResolver().notifyChange(uri, null);
-            return uri;
-        }
-        Log.d(TAG, "In CommentContentProvider.insert(), uri is not matched: " + uri);
-        throw new IllegalArgumentException("Illegal uri: " + uri);
     }
 
     @Override

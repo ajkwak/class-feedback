@@ -47,6 +47,15 @@ public class CommentContentProviderTest extends ProviderTestCase2<CommentContent
         Cursor cursor = mResolver.query(uri, null, null, null, null);
         assertNotNull(cursor);
         assertEquals(1, cursor.getCount());
+
+        // Verify that the values inserted into the database were correct.
+        cursor.moveToFirst();
+        String insertedRecipient = cursor.getString(cursor
+                .getColumnIndex(MySQLiteOpenHelper.COLUMN_RECIPIENT));
+        assertEquals(EMAIL, insertedRecipient);
+        String insertedContent = cursor.getString(cursor
+                .getColumnIndex(MySQLiteOpenHelper.COLUMN_CONTENT));
+        assertEquals(COMMENT_CONTENT, insertedContent);
         cursor.close();
 
         // Verify that the values cannot be added to the database a second time (no duplicates are

@@ -131,6 +131,28 @@ public class CommentContentProvider extends ContentProvider {
 
     @Override
     public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
-        throw new UnsupportedOperationException("update not supported");
+    	MySQLiteOpenHelper dbHelper = new MySQLiteOpenHelper(getContext());
+        SQLiteDatabase database = dbHelper.getWritableDatabase();
+        int rowsUpdated = 0;
+        switch (sURIMatcher.match(uri)) {
+        case COMMENTS:
+            Log.d(TAG, "In CommentContentProvider.update(), uri is COMMENTS");
+            rowsUpdated = database.update(MySQLiteOpenHelper.TABLE_COMMENTS, values, selection, selectionArgs);
+            break;
+        case COMMENTS_EMAIL:
+            Log.d(TAG, "In CommentContentProvider.update(), uri is COMMENTS_EMAIL");
+            String recipientSelection = MySQLiteOpenHelper.COLUMN_RECIPIENT + " = '"
+                    + uri.getLastPathSegment() + "'";
+            selection = (selection == null || selection.trim().length() == 0) ? recipientSelection
+                    : selection + " and " + recipientSelection;
+            rowsUpdated = database.update(MySQLiteOpenHelper.TABLE_COMMENTS, values, selection, selectionArgs);
+            break;
+        default:
+            Log.d(TAG, "In CommentContentProvider.update(), uri is not matched: " + uri);
+            throw new IllegalArgumentException("Illegal uri: " + uri);
+        }
+        // Notify anyone listening on the URI.
+        getContext().getContentResolver().notifyChange(uri, null);
+        return rowsUpdated;
     }
 }

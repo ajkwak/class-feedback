@@ -23,6 +23,9 @@ public class CommentContentProvider extends ContentProvider {
      */
     public static final String AUTHORITY = "edu.mills.cs180a.classfeedback";
     private static final String BASE_PATH = "comments";
+    /**
+     * The Uri associated with all comments provided by this {@link CommentContentProvider}.
+     */
     public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY
             + "/" + BASE_PATH);
 
@@ -37,7 +40,13 @@ public class CommentContentProvider extends ContentProvider {
         sURIMatcher.addURI(AUTHORITY, BASE_PATH + "/*", COMMENTS_EMAIL);
     }
 
-    public static Uri getContentUriForEmail(String email) { // TODO: TEST
+    /**
+     * Generates a {@code COMMENTS_EMAIL} {@link Uri} for the given email.
+     *
+     * @param email the email for which to generate the URI
+     * @return the URI for the {@code COMMENTS_EMAIL} associated with the given email
+     */
+    public static Uri getContentUriForEmail(String email) {
         return Uri.parse(CONTENT_URI + "/" + email);
     }
 

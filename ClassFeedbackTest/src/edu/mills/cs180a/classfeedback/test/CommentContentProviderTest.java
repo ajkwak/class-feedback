@@ -29,8 +29,16 @@ public class CommentContentProviderTest extends ProviderTestCase2<CommentContent
 		mProvider = getProvider();
 	}
 
+    public void testGetContentUriForEmail() {
+        Uri expectedUriForEmail1 = Uri.parse(CommentContentProvider.CONTENT_URI + "/" + EMAIL_1);
+        assertEquals(expectedUriForEmail1, CommentContentProvider.getContentUriForEmail(EMAIL_1));
+
+        Uri expectedUriForEmail2 = Uri.parse(CommentContentProvider.CONTENT_URI + "/" + EMAIL_2);
+        assertEquals(expectedUriForEmail2, CommentContentProvider.getContentUriForEmail(EMAIL_2));
+    }
+
 	public void testNoCommentsForEllenAtStart() {
-		Uri uri = Uri.parse(CommentContentProvider.CONTENT_URI + "/" + EMAIL_1);
+        Uri uri = CommentContentProvider.getContentUriForEmail(EMAIL_1);
 		String[] projection = { "content" };  // desired columns
 		Cursor cursor = mResolver.query(uri, projection, null, null, null);
 		assertNotNull(cursor);
@@ -141,7 +149,7 @@ public class CommentContentProviderTest extends ProviderTestCase2<CommentContent
         populateDatabase();
 
         // Query the database.
-        Uri uri = Uri.parse(CommentContentProvider.CONTENT_URI + "/" + EMAIL_1);
+        Uri uri = CommentContentProvider.getContentUriForEmail(EMAIL_1);
         Cursor cursor = mProvider.query(uri, null, null, null, null);
 
         // Verify that the returned results match the actual values in the database.
@@ -160,7 +168,7 @@ public class CommentContentProviderTest extends ProviderTestCase2<CommentContent
         populateDatabase();
 
         // Query the database.
-        Uri uri = Uri.parse(CommentContentProvider.CONTENT_URI + "/" + EMAIL_2);
+        Uri uri = CommentContentProvider.getContentUriForEmail(EMAIL_2);
         Cursor cursor = mProvider.query(uri, new String[] { MySQLiteOpenHelper.COLUMN_CONTENT },
                 null, null, null);
 
@@ -179,7 +187,7 @@ public class CommentContentProviderTest extends ProviderTestCase2<CommentContent
         populateDatabase();
 
         // Query the database.
-        Uri uri = Uri.parse(CommentContentProvider.CONTENT_URI + "/" + EMAIL_1);
+        Uri uri = CommentContentProvider.getContentUriForEmail(EMAIL_1);
         Cursor cursor = mProvider.query(uri, null, MySQLiteOpenHelper.COLUMN_CONTENT + "='"
                 + COMMENT_CONTENT_2 + "'", null, null);
 
@@ -193,7 +201,7 @@ public class CommentContentProviderTest extends ProviderTestCase2<CommentContent
         populateDatabase();
 
         // Query the database.
-        Uri uri = Uri.parse(CommentContentProvider.CONTENT_URI + "/" + EMAIL_2);
+        Uri uri = CommentContentProvider.getContentUriForEmail(EMAIL_2);
         Cursor cursor = mProvider.query(uri, new String[] { MySQLiteOpenHelper.COLUMN_CONTENT },
                 MySQLiteOpenHelper.COLUMN_CONTENT + "=?", new String[] { COMMENT_CONTENT_2 }, null);
 
@@ -209,7 +217,7 @@ public class CommentContentProviderTest extends ProviderTestCase2<CommentContent
     }
 
 	public void testInsert() {
-		Uri uri = Uri.parse(CommentContentProvider.CONTENT_URI + "/" + EMAIL_1);
+        Uri uri = CommentContentProvider.getContentUriForEmail(EMAIL_1);
 		ContentValues values = new ContentValues();
 		values.put(MySQLiteOpenHelper.COLUMN_RECIPIENT, EMAIL_1);
 		values.put(MySQLiteOpenHelper.COLUMN_CONTENT, COMMENT_CONTENT_1);
@@ -262,7 +270,7 @@ public class CommentContentProviderTest extends ProviderTestCase2<CommentContent
 	public void testDelete_commentForSingleRecipient_existingRecipient() {
 		populateDatabase();
 
-		Uri uri = Uri.parse(CommentContentProvider.CONTENT_URI + "/" + EMAIL_2);
+        Uri uri = CommentContentProvider.getContentUriForEmail(EMAIL_2);
 		assertEquals(1, mProvider.delete(uri, null, null));
 
 		// Verify the correct comment was deleted (so only the un-deleted comment remains).
@@ -283,7 +291,7 @@ public class CommentContentProviderTest extends ProviderTestCase2<CommentContent
 		populateDatabase();
 
 		// Delete comment for non-existent recipient.
-		Uri uri = Uri.parse(CommentContentProvider.CONTENT_URI + "/" + NON_EXISTENT_EMAIL);
+        Uri uri = CommentContentProvider.getContentUriForEmail(NON_EXISTENT_EMAIL);
 		assertEquals(0, mProvider.delete(uri, null, null));
 		assertEquals(2, getNumberOfCommentsInDatabase()); // No comments deleted.
 	}
@@ -381,7 +389,7 @@ public class CommentContentProviderTest extends ProviderTestCase2<CommentContent
 		populateDatabase();
 
 		// Update a single comment in the database.
-		Uri uri = Uri.parse(CommentContentProvider.CONTENT_URI + "/" + EMAIL_1);
+        Uri uri = CommentContentProvider.getContentUriForEmail(EMAIL_1);
 		ContentValues editedValues = new ContentValues();
 		editedValues.put(MySQLiteOpenHelper.COLUMN_CONTENT, COMMENT_CONTENT_2);
 		int updatedRows = mProvider.update(uri, editedValues, null, null);
@@ -477,14 +485,14 @@ public class CommentContentProviderTest extends ProviderTestCase2<CommentContent
 
 	private void populateDatabase() {
 		// Insert the first comment into the database.
-		Uri uri = Uri.parse(CommentContentProvider.CONTENT_URI + "/" + EMAIL_1);
+        Uri uri = CommentContentProvider.getContentUriForEmail(EMAIL_1);
 		ContentValues values = new ContentValues();
 		values.put(MySQLiteOpenHelper.COLUMN_RECIPIENT, EMAIL_1);
 		values.put(MySQLiteOpenHelper.COLUMN_CONTENT, COMMENT_CONTENT_1);
 		assertNotNull(mProvider.insert(uri, values));
 
 		// Insert the second comment into the database.
-		uri = Uri.parse(CommentContentProvider.CONTENT_URI + "/" + EMAIL_2);
+        uri = CommentContentProvider.getContentUriForEmail(EMAIL_2);
 		values = new ContentValues();
 		values.put(MySQLiteOpenHelper.COLUMN_RECIPIENT, EMAIL_2);
 		values.put(MySQLiteOpenHelper.COLUMN_CONTENT, COMMENT_CONTENT_2);

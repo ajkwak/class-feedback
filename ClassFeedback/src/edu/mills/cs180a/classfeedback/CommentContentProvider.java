@@ -45,8 +45,6 @@ public class CommentContentProvider extends ContentProvider {
     @Override
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs,
             String sortOrder) {
-        Log.d(TAG, "In CommentContentProvider.query()");
-        Log.d(TAG, "In CommentContentProvider, getContext().toString(): " + getContext().toString());
         MySQLiteOpenHelper dbHelper = new MySQLiteOpenHelper(getContext());
         SQLiteDatabase database = dbHelper.getWritableDatabase();
         Cursor cursor = null;

@@ -68,7 +68,6 @@ public class MainActivity extends Activity {
         public void onClick(View arg0) {
             Intent i = new Intent(MainActivity.this, CommentActivity.class);
             i.putExtra(CommentActivity.RECIPIENT, mPosition);
-            i.putExtra(CommentActivity.CDS_FACTORY, new CommentsDataSourceFactory());
             startActivityForResult(i, mPosition);
         }
     }

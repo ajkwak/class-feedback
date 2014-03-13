@@ -47,21 +47,24 @@ public class CommentContentProvider extends ContentProvider {
             String sortOrder) {
         Log.d(TAG, "In CommentContentProvider.query()");
         Log.d(TAG, "In CommentContentProvider, getContext().toString(): " + getContext().toString());
-        CommentsDataSource cds = new CommentsDataSource(getContext());
-        cds.open();
+        MySQLiteOpenHelper dbHelper = new MySQLiteOpenHelper(getContext());
+        SQLiteDatabase database = dbHelper.getWritableDatabase();
         Cursor cursor = null;
         switch (sURIMatcher.match(uri)) {
-            case COMMENTS:
-                Log.d(TAG, "In CommentContentProvider.query(), uri is COMMENTS");
-                cursor = cds.getCursorForAllComments(projection);
-                break;
-            case COMMENTS_EMAIL:
-                Log.d(TAG, "In CommentContentProvider.query(), uri is COMMENTS_EMAIL");
-                cursor = cds.getCursorForCommentForRecipient(uri.getLastPathSegment(), projection);
-                break;
-            default:
-                Log.d(TAG, "In CommentContentProvider.query(), uri is not matched: " + uri);
-                throw new IllegalArgumentException("Illegal uri: " + uri);
+        case COMMENTS:
+            Log.d(TAG, "In CommentContentProvider.query(), uri is COMMENTS");
+            cursor = database.query(MySQLiteOpenHelper.TABLE_COMMENTS, projection, selection,
+                    selectionArgs, null, null, sortOrder);
+            break;
+        case COMMENTS_EMAIL:
+            Log.d(TAG, "In CommentContentProvider.query(), uri is COMMENTS_EMAIL");
+            selection = updateSelectionWithRecipientConstraint(uri.getLastPathSegment(), selection);
+            cursor = database.query(MySQLiteOpenHelper.TABLE_COMMENTS, projection, selection,
+                    selectionArgs, null, null, sortOrder);
+            break;
+        default:
+            Log.d(TAG, "In CommentContentProvider.query(), uri is not matched: " + uri);
+            throw new IllegalArgumentException("Illegal uri: " + uri);
         }
         // Notify anyone listening on the URI.
         cursor.setNotificationUri(getContext().getContentResolver(), uri);
@@ -101,10 +104,7 @@ public class CommentContentProvider extends ContentProvider {
             break;
         case COMMENTS_EMAIL:
             Log.d(TAG, "In CommentContentProvider.query(), uri is COMMENTS_EMAIL");
-            String recipientSelection = MySQLiteOpenHelper.COLUMN_RECIPIENT + " = '"
-                    + uri.getLastPathSegment() + "'";
-            selection = (selection == null || selection.trim().length() == 0) ? recipientSelection
-                    : selection + " and " + recipientSelection;
+            selection = updateSelectionWithRecipientConstraint(uri.getLastPathSegment(), selection);
             rowsDeleted = database.delete(MySQLiteOpenHelper.TABLE_COMMENTS, selection,
                     selectionArgs);
             break;
@@ -141,10 +141,7 @@ public class CommentContentProvider extends ContentProvider {
             break;
         case COMMENTS_EMAIL:
             Log.d(TAG, "In CommentContentProvider.update(), uri is COMMENTS_EMAIL");
-            String recipientSelection = MySQLiteOpenHelper.COLUMN_RECIPIENT + " = '"
-                    + uri.getLastPathSegment() + "'";
-            selection = (selection == null || selection.trim().length() == 0) ? recipientSelection
-                    : selection + " and " + recipientSelection;
+            selection = updateSelectionWithRecipientConstraint(uri.getLastPathSegment(), selection);
             rowsUpdated = database.update(MySQLiteOpenHelper.TABLE_COMMENTS, values, selection, selectionArgs);
             break;
         default:
@@ -154,5 +151,11 @@ public class CommentContentProvider extends ContentProvider {
         // Notify anyone listening on the URI.
         getContext().getContentResolver().notifyChange(uri, null);
         return rowsUpdated;
+    }
+
+    private String updateSelectionWithRecipientConstraint(String recipient, String selection) {
+        String recipientSelection = MySQLiteOpenHelper.COLUMN_RECIPIENT + " = '" + recipient + "'";
+        return (selection == null || selection.trim().length() == 0) ? recipientSelection
+                : selection + " and " + recipientSelection;
     }
 }

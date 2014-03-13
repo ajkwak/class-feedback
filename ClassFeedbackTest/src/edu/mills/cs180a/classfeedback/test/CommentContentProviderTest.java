@@ -12,7 +12,7 @@ import edu.mills.cs180a.classfeedback.MySQLiteOpenHelper;
 public class CommentContentProviderTest extends ProviderTestCase2<CommentContentProvider> {
 	private MockContentResolver mResolver;
 	private CommentContentProvider mProvider;
-	private static final String EMAIL_1 = "bar@foo.edu";
+    private static final String EMAIL_1 = "bar@foo.edu"; // EMAIL_1 alphabetically before EMAIL_2.
 	private static final String EMAIL_2 = "foo@bar.com";
 	private static final String NON_EXISTENT_EMAIL = "idontexist@android.com";
 	private static final String COMMENT_CONTENT_1 = "Hello, world!";
@@ -37,6 +37,176 @@ public class CommentContentProviderTest extends ProviderTestCase2<CommentContent
 		assertEquals(0, cursor.getCount());
 		cursor.close();
 	}
+
+    public void testQuery_noCommentsInDatabase() {
+        // Verify that database is initially empty.
+        assertEquals(0, getNumberOfCommentsInDatabase());
+
+        // Verify that the provider reflects that the database is initially empty.
+        Uri uri = CommentContentProvider.CONTENT_URI;
+        Cursor cursor = mProvider.query(uri, null, null, null, null);
+        assertEquals(0, cursor.getCount());
+    }
+
+    public void testQuery_allComments_withoutProjectionOrSelection() {
+        populateDatabase();
+
+        // Query the database.
+        Uri uri = CommentContentProvider.CONTENT_URI;
+        Cursor cursor = mProvider.query(uri, null, null, null,
+                MySQLiteOpenHelper.COLUMN_RECIPIENT + " ASC");
+
+        // Verify that the returned results match the actual values in the database.
+        assertNotNull(cursor);
+        assertEquals(2, cursor.getCount());
+
+        cursor.moveToFirst();
+        int recipientColumn = cursor.getColumnIndex(MySQLiteOpenHelper.COLUMN_RECIPIENT);
+        int contentColumn = cursor.getColumnIndex(MySQLiteOpenHelper.COLUMN_CONTENT);
+        assertEquals(EMAIL_1, cursor.getString(recipientColumn));
+        assertEquals(COMMENT_CONTENT_1, cursor.getString(contentColumn));
+
+        cursor.moveToNext();
+        assertEquals(EMAIL_2, cursor.getString(recipientColumn));
+        assertEquals(COMMENT_CONTENT_2, cursor.getString(contentColumn));
+        cursor.close();
+    }
+
+    public void testQuery_allComments_withProjection() {
+        populateDatabase();
+
+        // Get all recipients associated with a comment in the database.
+        Uri uri = CommentContentProvider.CONTENT_URI;
+        Cursor cursor = mProvider.query(uri, new String[] { MySQLiteOpenHelper.COLUMN_RECIPIENT },
+                null, null, MySQLiteOpenHelper.COLUMN_RECIPIENT + " ASC");
+
+        // Verify that the returned results match the actual values in the database.
+        assertNotNull(cursor);
+        assertEquals(2, cursor.getCount());
+        assertEquals(1, cursor.getColumnCount());
+
+        cursor.moveToFirst();
+        int recipientColumn = cursor.getColumnIndex(MySQLiteOpenHelper.COLUMN_RECIPIENT);
+        assertEquals(EMAIL_1, cursor.getString(recipientColumn));
+
+        cursor.moveToNext();
+        assertEquals(EMAIL_2, cursor.getString(recipientColumn));
+        cursor.close();
+    }
+
+    public void testQuery_allComments_withSelection() {
+        populateDatabase();
+
+        // Query the database.
+        Uri uri = CommentContentProvider.CONTENT_URI;
+        Cursor cursor = mProvider.query(uri, null, MySQLiteOpenHelper.COLUMN_CONTENT + "=?",
+                new String[] { COMMENT_CONTENT_2 }, MySQLiteOpenHelper.COLUMN_RECIPIENT + " ASC");
+
+        // Verify that the returned results match the actual values in the database.
+        assertNotNull(cursor);
+        assertEquals(1, cursor.getCount());
+
+        cursor.moveToFirst();
+        int recipientColumn = cursor.getColumnIndex(MySQLiteOpenHelper.COLUMN_RECIPIENT);
+        int contentColumn = cursor.getColumnIndex(MySQLiteOpenHelper.COLUMN_CONTENT);
+        assertEquals(EMAIL_2, cursor.getString(recipientColumn));
+        assertEquals(COMMENT_CONTENT_2, cursor.getString(contentColumn));
+        cursor.close();
+    }
+
+    public void testQuery_allComments_withProjectionAndSelection() {
+        populateDatabase();
+
+        // Query the database.
+        Uri uri = CommentContentProvider.CONTENT_URI;
+        Cursor cursor = mProvider.query(uri, new String[] {
+                    MySQLiteOpenHelper.COLUMN_RECIPIENT,
+                    MySQLiteOpenHelper.COLUMN_CONTENT },
+                MySQLiteOpenHelper.COLUMN_CONTENT + "=?", new String[] { COMMENT_CONTENT_2 }, null);
+
+        // Verify that the returned results match the actual values in the database.
+        assertNotNull(cursor);
+        assertEquals(1, cursor.getCount());
+        assertEquals(2, cursor.getColumnCount());
+
+        cursor.moveToFirst();
+        int recipientColumn = cursor.getColumnIndex(MySQLiteOpenHelper.COLUMN_RECIPIENT);
+        int contentColumn = cursor.getColumnIndex(MySQLiteOpenHelper.COLUMN_CONTENT);
+        assertEquals(EMAIL_2, cursor.getString(recipientColumn));
+        assertEquals(COMMENT_CONTENT_2, cursor.getString(contentColumn));
+        cursor.close();
+    }
+
+    public void testQuery_commentForRecipient_withoutProjectionOrSelection() {
+        populateDatabase();
+
+        // Query the database.
+        Uri uri = Uri.parse(CommentContentProvider.CONTENT_URI + "/" + EMAIL_1);
+        Cursor cursor = mProvider.query(uri, null, null, null, null);
+
+        // Verify that the returned results match the actual values in the database.
+        assertNotNull(cursor);
+        assertEquals(1, cursor.getCount());
+
+        cursor.moveToFirst();
+        int recipientColumn = cursor.getColumnIndex(MySQLiteOpenHelper.COLUMN_RECIPIENT);
+        int contentColumn = cursor.getColumnIndex(MySQLiteOpenHelper.COLUMN_CONTENT);
+        assertEquals(EMAIL_1, cursor.getString(recipientColumn));
+        assertEquals(COMMENT_CONTENT_1, cursor.getString(contentColumn));
+        cursor.close();
+    }
+
+    public void testQuery_commentForRecipient_withProjection() {
+        populateDatabase();
+
+        // Query the database.
+        Uri uri = Uri.parse(CommentContentProvider.CONTENT_URI + "/" + EMAIL_2);
+        Cursor cursor = mProvider.query(uri, new String[] { MySQLiteOpenHelper.COLUMN_CONTENT },
+                null, null, null);
+
+        // Verify that the returned results match the actual values in the database.
+        assertNotNull(cursor);
+        assertEquals(1, cursor.getCount());
+        assertEquals(1, cursor.getColumnCount());
+
+        cursor.moveToFirst();
+        int contentColumn = cursor.getColumnIndex(MySQLiteOpenHelper.COLUMN_CONTENT);
+        assertEquals(COMMENT_CONTENT_2, cursor.getString(contentColumn));
+        cursor.close();
+    }
+
+    public void testQuery_commentForRecipient_withSelection() {
+        populateDatabase();
+
+        // Query the database.
+        Uri uri = Uri.parse(CommentContentProvider.CONTENT_URI + "/" + EMAIL_1);
+        Cursor cursor = mProvider.query(uri, null, MySQLiteOpenHelper.COLUMN_CONTENT + "='"
+                + COMMENT_CONTENT_2 + "'", null, null);
+
+        // Verify that there are no values matching the given query.
+        assertNotNull(cursor);
+        assertEquals(0, cursor.getCount());
+        cursor.close();
+    }
+
+    public void testQuery_commentForRecipient_withProjectionAndSelection() {
+        populateDatabase();
+
+        // Query the database.
+        Uri uri = Uri.parse(CommentContentProvider.CONTENT_URI + "/" + EMAIL_2);
+        Cursor cursor = mProvider.query(uri, new String[] { MySQLiteOpenHelper.COLUMN_CONTENT },
+                MySQLiteOpenHelper.COLUMN_CONTENT + "=?", new String[] { COMMENT_CONTENT_2 }, null);
+
+        // Verify that the returned results match the actual values in the database.
+        assertNotNull(cursor);
+        assertEquals(1, cursor.getCount());
+        assertEquals(1, cursor.getColumnCount());
+
+        cursor.moveToFirst();
+        int contentColumn = cursor.getColumnIndex(MySQLiteOpenHelper.COLUMN_CONTENT);
+        assertEquals(COMMENT_CONTENT_2, cursor.getString(contentColumn));
+        cursor.close();
+    }
 
 	public void testInsert() {
 		Uri uri = Uri.parse(CommentContentProvider.CONTENT_URI + "/" + EMAIL_1);
@@ -204,6 +374,7 @@ public class CommentContentProviderTest extends ProviderTestCase2<CommentContent
 		content = cursor.getString(contentColumn);
 		assertEquals(EMAIL_2, recipient);
 		assertEquals(COMMENT_CONTENT_2 /* unchanged content */, content);
+        cursor.close();
 	}
 
 	public void testUpdate_singleCommentUpdated_withoutSelection() {
@@ -235,6 +406,7 @@ public class CommentContentProviderTest extends ProviderTestCase2<CommentContent
 		content = cursor.getString(contentColumn);
 		assertEquals(EMAIL_2, recipient);
 		assertEquals(COMMENT_CONTENT_2 /* unchanged content */, content);
+        cursor.close();
 	}
 
 	public void testUpdate_multipleCommentsUpdated() {
@@ -266,6 +438,7 @@ public class CommentContentProviderTest extends ProviderTestCase2<CommentContent
 		content = cursor.getString(contentColumn);
 		assertEquals(EMAIL_2, recipient);
 		assertEquals(editedContent, content);
+        cursor.close();
 	}
 
 	public void testUpdate_noCommentsUpdated() {
@@ -299,6 +472,7 @@ public class CommentContentProviderTest extends ProviderTestCase2<CommentContent
 		content = cursor.getString(contentColumn);
 		assertEquals(EMAIL_2, recipient);
 		assertEquals(COMMENT_CONTENT_2, content);
+        cursor.close();
 	}
 
 	private void populateDatabase() {

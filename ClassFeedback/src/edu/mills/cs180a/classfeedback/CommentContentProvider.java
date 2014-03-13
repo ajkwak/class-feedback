@@ -37,6 +37,10 @@ public class CommentContentProvider extends ContentProvider {
         sURIMatcher.addURI(AUTHORITY, BASE_PATH + "/*", COMMENTS_EMAIL);
     }
 
+    public static Uri getContentUriForEmail(String email) { // TODO: TEST
+        return Uri.parse(CONTENT_URI + "/" + email);
+    }
+
     @Override
     public boolean onCreate() {
         return false;

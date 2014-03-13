@@ -1,6 +1,7 @@
 package edu.mills.cs180a.classfeedback.test;
 
 import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.drawable.Drawable;
@@ -26,6 +27,7 @@ public class CommentActivityTest extends ActivityInstrumentationTestCase2<Commen
     private EditText mCommentField;
     private Button mSaveButton;
     private Button mCancelButton;
+    private Button mDeleteButton;
     private static final String TAG = "CommentActivityTest";
 
 	public CommentActivityTest() {
@@ -49,6 +51,7 @@ public class CommentActivityTest extends ActivityInstrumentationTestCase2<Commen
         mCommentField = (EditText) mActivity.findViewById(R.id.commentEditText);
         mSaveButton = (Button) mActivity.findViewById(R.id.saveCommentButton);
         mCancelButton = (Button) mActivity.findViewById(R.id.cancelCommentButton);
+        mDeleteButton = (Button) mActivity.findViewById(R.id.deleteCommentButton);
     }
 
     @Override
@@ -72,36 +75,14 @@ public class CommentActivityTest extends ActivityInstrumentationTestCase2<Commen
                 mImageView.getDrawable().getConstantState());
     }
 
-    // Make sure that the comment field is initially empty.
-    public void testCommentFieldEmpty() {
+    public void testCommentField_noComment() {
+        // If no comment associated with the recipient (as when the database is empty), the comment
+        // field should be initially empty.
         assertEquals(0, mCommentField.getText().length());
     }
 
-    private int getNumCommentsForRecipient(Person recipient) {
-        Uri uri = CommentContentProvider.getContentUriForEmail(recipient.getEmail());
-        Cursor cursor = mResolver.query(uri, new String[] { MySQLiteOpenHelper.COLUMN_CONTENT },
-                null, null, null);
-        int count = cursor.getCount();
-        cursor.close();
-        return count;
-    }
-
-    private void internalTestCommentEntry() {
-        String[] desiredColumns = { MySQLiteOpenHelper.COLUMN_CONTENT };
-        assertEquals("Database is not empty at beginning of test.",
-                0, getNumCommentsForRecipient(RECIPIENT));
-
-        // Simulate entering a comment.
-        mCommentField.setText(COMMENT_TEXT);
-        mSaveButton.performClick();
-        Uri uri = CommentContentProvider.getContentUriForEmail(RECIPIENT.getEmail());
-        Cursor cursor = mResolver.query(uri, desiredColumns, null, null, null);
-
-        assertEquals(1, cursor.getCount());
-        assertTrue(cursor.moveToFirst());
-        assertEquals(COMMENT_TEXT, cursor.getString(0));
-        assertFalse(cursor.moveToNext());
-        cursor.close();
+    public void testCommentField_withExistingComment() {
+        // fail("Not yet implemented");
     }
 
     // Test comment entry twice, to make sure that the database has no comments
@@ -133,5 +114,124 @@ public class CommentActivityTest extends ActivityInstrumentationTestCase2<Commen
         assertEquals(0, getNumCommentsForRecipient(RECIPIENT));
         assertFalse(cursor.moveToNext());
         cursor.close();
+    }
+
+    @UiThreadTest
+    public void testSaveButton_insertsNewComment() {
+        // Database is initially empty.
+        assertEquals(0, getNumCommentsForRecipient(RECIPIENT));
+        assertEquals("", mCommentField.getText().toString());
+
+        // Simulate adding text and save request.
+        mCommentField.setText(COMMENT_TEXT);
+        mSaveButton.performClick();
+
+        // Verify comment was successfully added to database.
+        Uri uri = CommentContentProvider.getContentUriForEmail(RECIPIENT.getEmail());
+        String[] desiredColumns = {
+                MySQLiteOpenHelper.COLUMN_RECIPIENT,
+                MySQLiteOpenHelper.COLUMN_CONTENT };
+        Cursor cursor = mResolver.query(uri, desiredColumns, null, null, null);
+        assertEquals(1, getNumCommentsForRecipient(RECIPIENT));
+        cursor.moveToNext();
+        assertEquals(RECIPIENT.getEmail(),
+                cursor.getString(cursor.getColumnIndex(MySQLiteOpenHelper.COLUMN_RECIPIENT)));
+        assertEquals(COMMENT_TEXT,
+                cursor.getString(cursor.getColumnIndex(MySQLiteOpenHelper.COLUMN_CONTENT)));
+        assertTrue(cursor.isLast()); // There is only one comment for the recipient.
+        cursor.close();
+    }
+
+    @UiThreadTest
+    public void testSaveButton_updatesExistingComment() {
+        populateDatabase();
+
+        // Verify that recipient is associated with a comment.
+        assertEquals(1, getNumCommentsForRecipient(RECIPIENT));
+
+        // Simulate adding text and save request.
+        String newCommentText = "Bacillus mycoides";
+        assertFalse(newCommentText.equals(COMMENT_TEXT)); // Don't want to update text to same value.
+        mCommentField.setText(newCommentText);
+        mSaveButton.performClick();
+
+        // Verify comment was successfully added to database.
+        Uri uri = CommentContentProvider.getContentUriForEmail(RECIPIENT.getEmail());
+        String[] desiredColumns = {
+                MySQLiteOpenHelper.COLUMN_RECIPIENT,
+                MySQLiteOpenHelper.COLUMN_CONTENT };
+        Cursor cursor = mResolver.query(uri, desiredColumns, null, null, null);
+        assertEquals(1, getNumCommentsForRecipient(RECIPIENT));
+        cursor.moveToNext();
+        assertEquals(RECIPIENT.getEmail(),
+                cursor.getString(cursor.getColumnIndex(MySQLiteOpenHelper.COLUMN_RECIPIENT)));
+        assertEquals(newCommentText,
+                cursor.getString(cursor.getColumnIndex(MySQLiteOpenHelper.COLUMN_CONTENT)));
+        assertTrue(cursor.isLast()); // There is only one comment for the recipient.
+        cursor.close();
+    }
+
+    // Try deleting the comment when there is no comment to delete.
+    @UiThreadTest
+    public void testDeleteButton_emptyDatabase() {
+        // Database is initially empty.
+        assertEquals(0, getNumCommentsForRecipient(RECIPIENT));
+        assertEquals("", mCommentField.getText().toString());
+
+        // Simulate a delete request.
+        mDeleteButton.performClick();
+
+        // Verify there is still no comment associated with the recipient.
+        assertEquals(0, getNumCommentsForRecipient(RECIPIENT));
+    }
+
+    @UiThreadTest
+    public void testDeleteButton_withExistingComment() {
+        populateDatabase();
+
+        // Verify that recipient is associated with a comment.
+        assertEquals(1, getNumCommentsForRecipient(RECIPIENT));
+
+        // Simulate a delete request.
+        mDeleteButton.performClick();
+
+        // Verify that comment has been deleted.
+        assertEquals(0, getNumCommentsForRecipient(RECIPIENT));
+    }
+
+    private int getNumCommentsForRecipient(Person recipient) {
+        Uri uri = CommentContentProvider.getContentUriForEmail(recipient.getEmail());
+        Cursor cursor = mResolver.query(uri, new String[] { MySQLiteOpenHelper.COLUMN_CONTENT },
+                null, null, null);
+        int count = cursor.getCount();
+        cursor.close();
+        return count;
+    }
+
+    private void internalTestCommentEntry() {
+        String[] desiredColumns = { MySQLiteOpenHelper.COLUMN_CONTENT };
+        assertEquals("Database is not empty at beginning of test.", 0,
+                getNumCommentsForRecipient(RECIPIENT));
+
+        // Simulate entering a comment.
+        mCommentField.setText(COMMENT_TEXT);
+        mSaveButton.performClick();
+        Uri uri = CommentContentProvider.getContentUriForEmail(RECIPIENT.getEmail());
+        Cursor cursor = mResolver.query(uri, desiredColumns, null, null, null);
+
+        assertEquals(1, cursor.getCount());
+        assertTrue(cursor.moveToFirst());
+        assertEquals(COMMENT_TEXT, cursor.getString(0));
+        assertFalse(cursor.moveToNext());
+        cursor.close();
+    }
+
+    private void populateDatabase() {
+        String email = RECIPIENT.getEmail();
+        Uri uri = CommentContentProvider.getContentUriForEmail(email);
+        ContentValues values = new ContentValues();
+        values.put(MySQLiteOpenHelper.COLUMN_RECIPIENT, email);
+        values.put(MySQLiteOpenHelper.COLUMN_CONTENT, COMMENT_TEXT);
+        mResolver.insert(uri, values);
     }
 }

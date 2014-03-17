@@ -8,6 +8,13 @@ import android.test.mock.MockContentResolver;
 import edu.mills.cs180a.classfeedback.CommentContentProvider;
 import edu.mills.cs180a.classfeedback.MySQLiteOpenHelper;
 
+/**
+ * JUnit tests for {@link CommentContentProvider}.
+ * 
+ * @author ellen.spertus@gmail.com (Ellen Spertus)
+ * @author ajkwak@users.noreply.github.com (AJ Parmidge)
+ * @author cyu@mills.edu (Ching Yu)
+ */
 // This creates an IsolatedContext and does not affect the production store.
 public class CommentContentProviderTest extends ProviderTestCase2<CommentContentProvider> {
 	private MockContentResolver mResolver;

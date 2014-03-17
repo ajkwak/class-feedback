@@ -10,8 +10,8 @@ import android.net.Uri;
 import android.util.Log;
 
 /**
- * A content provider for comments meant for specified individuals,
- * backed by {@link CommentsDataSource}.
+ * A content provider for comments meant for specified individuals, backed by a
+ * {@link SQLiteDatabase}.
  *
  * @author ellen.spertus@gmail.com (Ellen Spertus)
  */

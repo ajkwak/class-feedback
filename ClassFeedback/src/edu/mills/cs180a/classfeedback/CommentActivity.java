@@ -19,16 +19,19 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 /**
- * An {@code Activity} that solicits a {@link Comment} about the specified {@link Person}.
- * The recipient of the comment is specified as an index into {@link Person#everyone}
- * and is communicated via the key {@link #RECIPIENT} in the {@link android.intent.Intent}.
- *
- * <P>The user is given the choice of saving or canceling the comment.  If saved,
- * it is added to the database, and the result code {@link Activity#RESULT_OK} is
- * provided to the parent activity.  Otherwise, the database is not modified, and
- * the result code {@link Activity#RESULT_CANCELED} is provided.
- *
+ * An {@code Activity} that solicits a {@link Comment} about the specified {@link Person}. The
+ * recipient of the comment is specified as an index into {@link Person#everyone} and is
+ * communicated via the key {@link #RECIPIENT} in the {@link android.intent.Intent}.
+ * 
+ * <P>
+ * The user is given the choice of saving or canceling the comment. If saved, it is added to the
+ * database, and the result code {@link Activity#RESULT_OK} is provided to the parent activity.
+ * Otherwise, the database is not modified, and the result code {@link Activity#RESULT_CANCELED} is
+ * provided.
+ * 
  * @author ellen.spertus@gmail.com (Ellen Spertus)
+ * @author ajkwak@users.noreply.github.com (AJ Parmidge)
+ * @author cyu@mills.edu (Ching Yu)
  */
 public class CommentActivity extends Activity {
 	private static final String TAG = "CommentActivity";

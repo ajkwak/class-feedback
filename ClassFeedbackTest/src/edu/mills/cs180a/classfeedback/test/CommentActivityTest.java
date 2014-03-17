@@ -17,6 +17,12 @@ import edu.mills.cs180a.classfeedback.MySQLiteOpenHelper;
 import edu.mills.cs180a.classfeedback.Person;
 import edu.mills.cs180a.classfeedback.R;
 
+/**
+ * JUnit tests for {@link CommentActivity}.
+ * 
+ * @author ajkwak@users.noreply.github.com (AJ Parmidge)
+ * @author cyu@mills.edu (Ching Yu)
+ */
 public class CommentActivityTest extends ActivityInstrumentationTestCase2<CommentActivity> {
 	private static final int RECIPIENT_INDEX = 0;  // Use person 0 in Person.everyone.
 	private static final Person RECIPIENT = Person.everyone[RECIPIENT_INDEX];

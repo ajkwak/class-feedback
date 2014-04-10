@@ -11,23 +11,23 @@ import android.test.UiThreadTest;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-import edu.mills.cs180a.classfeedback.CommentActivity;
 import edu.mills.cs180a.classfeedback.CommentContentProvider;
+import edu.mills.cs180a.classfeedback.MainActivity;
 import edu.mills.cs180a.classfeedback.MySQLiteOpenHelper;
 import edu.mills.cs180a.classfeedback.Person;
 import edu.mills.cs180a.classfeedback.R;
 
 /**
- * JUnit tests for {@link CommentActivity}.
+ * JUnit tests for {@link MainActivity}.
  * 
  * @author ajkwak@users.noreply.github.com (AJ Parmidge)
  * @author cyu@mills.edu (Ching Yu)
  */
-public class CommentActivityTest extends ActivityInstrumentationTestCase2<CommentActivity> {
+public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActivity> {
 	private static final int RECIPIENT_INDEX = 0;  // Use person 0 in Person.everyone.
 	private static final Person RECIPIENT = Person.everyone[RECIPIENT_INDEX];
 	private static final String COMMENT_TEXT = "lorem ipsum";
-	private CommentActivity mActivity;
+    private MainActivity mActivity;
 	private ContentResolver mResolver;
 	private ImageView mImageView;
 	private EditText mCommentField;
@@ -37,8 +37,8 @@ public class CommentActivityTest extends ActivityInstrumentationTestCase2<Commen
 	private Button mClearButton;
 	private static final String TAG = "CommentActivityTest";
 
-	public CommentActivityTest() {
-		super(CommentActivity.class);
+	public MainActivityTest() {
+		super(MainActivity.class);
 	}
 
 	@Override
@@ -47,11 +47,12 @@ public class CommentActivityTest extends ActivityInstrumentationTestCase2<Commen
 
 		Intent i = new Intent();
 		setActivityInitialTouchMode(true);
-		i.putExtra(CommentActivity.RECIPIENT, RECIPIENT_INDEX);
 		setActivityIntent(i);
 		// This must occur after setting the touch mode and intent.
 		mActivity = getActivity();
 		mResolver = mActivity.getContentResolver();
+
+        mActivity.onPersonSelected(RECIPIENT_INDEX);
 
 		// Initialize references to views.
 		mImageView = (ImageView) mActivity.findViewById(R.id.commentImageView);

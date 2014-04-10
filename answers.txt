@@ -1,8 +1,8 @@
 AJ Parmidge and Ching Yu
 Mobile App Development
 Ellen Spertus
-Lab 6: Testing and Content Providers
-17 March 2014
+Lab 7: Fragments
+20 March 2014
 
 Please see the following link for the writeup for this lab:
-https://docs.google.com/a/mills.edu/document/d/15NBNPYtLExb_NjdZguTFr7JqtIj6khtR67Dethno7GA/edit
+   https://docs.google.com/a/mills.edu/document/d/14aZ3ebWfyTj4hlU_Sac_BoGUP4kWYsxEzf0PTH0CSvc/edit#heading=h.8o8kbcd8he99

@@ -2,6 +2,7 @@
 <resources>
     <string name="app_name">ClassFeedback</string>
     <string name="action_settings">Settings</string>
+    <string name="placeholder">Placeholder</string>
     <string name="row_image_content_description">Image of person named on row</string>
     <string name="comment_button">Comment</string>
     <string name="save_button">Save</string>

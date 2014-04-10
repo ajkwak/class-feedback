@@ -1,97 +1,107 @@
 
 package edu.mills.cs180a.classfeedback;
 import android.app.Activity;
-import android.content.Context;
-import android.content.Intent;
+import android.app.Fragment;
+import android.app.FragmentManager;
 import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.View.OnClickListener;
-import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.ListView;
-import android.widget.TextView;
+import android.util.DisplayMetrics;
+import android.util.Log;
 import android.widget.Toast;
 
 /**
- * An {@code Activity} that displays a list of the names of {@link Person people in CS 180A}.
- * If a name is clicked on, a {@link CommentActivity} is opened, soliciting a
- * comment for the selected person.
+ * An {@code Activity} that displays a list of the names of {@link Person people in CS 180A}. If a
+ * name is clicked, then the activity displays a {@link CommentFragment}, which solicits a
+ * {@link Comment} about the specified {@link Person}. In the {@link CommentFragment}, the user is
+ * given the choice of saving, canceling, deleting, or mailing the comment. The user can also clear
+ * the comment field with or without saving their changes.
  *
  * @author ellen.spertus@gmail.com (Ellen Spertus)
+ * @author ajkwak@users.noreply.github.com (AJ Parmidge)
  */
-public class MainActivity extends Activity {
-    private LayoutInflater mInflater;
+public class MainActivity extends Activity implements ClassListFragment.OnPersonSelectedListener {
+    private static final String TAG = "MainActivity";
+    private static final int MIN_MULTIPANE_WIDTH = 700;
+    private static final String KEY_PErSON_ID = "person id";
+    private FragmentManager fragmentManager;
+    private Fragment listFragment, detailFragment;
+    private boolean multiPane;
+    private int selectedPersonId = -1; // Initialize to invalid value.
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Populate a list from Person.everyone.
-        ArrayAdapter<Person> adapter = new PersonArrayAdapter();
-        ListView listView = (ListView) findViewById(R.id.listView1);
-        listView.setAdapter(adapter);
+        // Get references to fragment manager and fragments.
+        fragmentManager = getFragmentManager();
+        listFragment = fragmentManager.findFragmentById(R.id.listFragment);
+        detailFragment = fragmentManager.findFragmentById(R.id.detailFragment);
 
-        // Initialize mInflater, which is needed in PersonArrayAdapter.getView().
-        mInflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        // Determine whether to use single or multiple panes.
+        DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
+        float screenWidthDp = displayMetrics.widthPixels / displayMetrics.density;
+        float screenHeightDp = displayMetrics.heightPixels / displayMetrics.density;
+        Log.d(TAG, "screenWidthDp: " + screenWidthDp);
+        Log.d(TAG, "screenHeightDp: " + screenHeightDp);
+        multiPane = screenWidthDp >= MIN_MULTIPANE_WIDTH;
+
+        // Determine whether the user has selected a person to display.
+        if (savedInstanceState != null) {
+            selectedPersonId = savedInstanceState.getInt(KEY_PErSON_ID, -1);
+        }
+
+        if (selectedPersonId > -1) {
+            // Then display the selected person.
+            onPersonSelected(selectedPersonId);
+        } else {
+            fragmentManager.beginTransaction().hide(detailFragment).commit();
+        }
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if(data != null){
-            // Make a toast informing the user of what has occurred.
-            String toastText = "";
-            int recipientId = data.getIntExtra(CommentActivity.RECIPIENT, -1);
-            String recipient = Person.everyone[recipientId].toString();
-            if (resultCode == RESULT_OK) {
-                toastText = getString(R.string.comment_altered_toast);
-                int actionId = data.getIntExtra(CommentActivity.ACTION, -1);
-                String action = getString(actionId);
-                toastText = String.format(toastText, action, recipient);
-            } else if (resultCode == RESULT_CANCELED) {
-                toastText = getString(R.string.comment_canceled_toast);
-                toastText = String.format(toastText, recipient);
-            }
-
-            Toast.makeText(this, toastText, Toast.LENGTH_SHORT).show();
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        super.onSaveInstanceState(savedInstanceState);
+        if (!detailFragment.isHidden()) {
+            savedInstanceState.putInt(KEY_PErSON_ID, selectedPersonId);
         }
     }
 
-    private class OnItemClickListener implements OnClickListener{
-        private int mPosition;
-        OnItemClickListener(int position) {
-            mPosition = position;
+    @Override
+    public void onPersonSelected(int personId) {
+        selectedPersonId = personId;
+
+        // If we're in multi-pane mode, show the detail pane if it isn't already visible.
+        if (multiPane && detailFragment.isHidden()) {
+            fragmentManager
+                    .beginTransaction()
+                    .show(detailFragment)
+                    .addToBackStack(null)
+                    .commit();
         }
-        @Override
-        public void onClick(View arg0) {
-            Intent i = new Intent(MainActivity.this, CommentActivity.class);
-            i.putExtra(CommentActivity.RECIPIENT, mPosition);
-            startActivityForResult(i, mPosition);
+        // If we're in single-pane mode, show the detail panel and hide the overview list.
+        else if (!multiPane) {
+            fragmentManager
+                    .beginTransaction()
+                    .show(detailFragment)
+                    .hide(listFragment)
+                    .addToBackStack(null)
+                    .commit();
         }
+        // Show the current person.
+        ((CommentFragment) detailFragment).setRecipient(personId);
     }
-
-    private class PersonArrayAdapter extends ArrayAdapter<Person> {
-        PersonArrayAdapter() {
-            super(MainActivity.this, R.layout.row, R.id.rowTextView, Person.everyone);
-        }
-
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            // Handling click events from a row inside a ListView gets very strange.
-            // Solution found at "http://stackoverflow.com/questions/1821871".
-            if (null == convertView) {
-                convertView = mInflater.inflate(R.layout.row, null);
-            }
-            Button button = (Button) convertView.findViewById(R.id.rowButtonView);
-            button.setOnClickListener(new OnItemClickListener(position));
-            Person person = getItem(position);
-            ImageView icon = (ImageView) convertView.findViewById(R.id.rowImageView);
-            icon.setImageResource(person.getImageId());
-            TextView name = (TextView) convertView.findViewById(R.id.rowTextView);
-            name.setText(person.getFirstName());
-            return convertView;
-        }
+ 
+    /**
+     * Hides the {@link CommentFragment} when the user is finished saving, deleting, or mailing the
+     * comment. Upon exiting the comment fragment, displays the given text as a {@link Toast} and
+     * pops the last item off the back stack.
+     * 
+     * @param message the message to display upon hiding (returning from) the
+     *        {@link CommentFragment}
+     */
+    void hideCommentFragment(String message) {
+        fragmentManager.beginTransaction().show(listFragment).hide(detailFragment).commit();
+        fragmentManager.popBackStack();
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
 }

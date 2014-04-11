@@ -21,9 +21,9 @@ import android.widget.Toast;
 public class MainActivity extends Activity implements ClassListFragment.OnPersonSelectedListener {
     private static final String TAG = "MainActivity";
     private static final int MIN_MULTIPANE_WIDTH = 700;
-    private static final String KEY_PErSON_ID = "person id";
+    private static final String KEY_PERSON_ID = "person id";
     private FragmentManager fragmentManager;
-    private Fragment listFragment, detailFragment;
+    private Fragment classListFragment, commentFragment;
     private boolean multiPane;
     private int selectedPersonId = -1; // Initialize to invalid value.
 
@@ -34,8 +34,8 @@ public class MainActivity extends Activity implements ClassListFragment.OnPerson
 
         // Get references to fragment manager and fragments.
         fragmentManager = getFragmentManager();
-        listFragment = fragmentManager.findFragmentById(R.id.listFragment);
-        detailFragment = fragmentManager.findFragmentById(R.id.detailFragment);
+        classListFragment = fragmentManager.findFragmentById(R.id.classListFragment);
+        commentFragment = fragmentManager.findFragmentById(R.id.commentFragment);
 
         // Determine whether to use single or multiple panes.
         DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
@@ -47,22 +47,22 @@ public class MainActivity extends Activity implements ClassListFragment.OnPerson
 
         // Determine whether the user has selected a person to display.
         if (savedInstanceState != null) {
-            selectedPersonId = savedInstanceState.getInt(KEY_PErSON_ID, -1);
+            selectedPersonId = savedInstanceState.getInt(KEY_PERSON_ID, -1);
         }
 
         if (selectedPersonId > -1) {
             // Then display the selected person.
             onPersonSelected(selectedPersonId);
         } else {
-            fragmentManager.beginTransaction().hide(detailFragment).commit();
+            fragmentManager.beginTransaction().hide(commentFragment).commit();
         }
     }
 
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
         super.onSaveInstanceState(savedInstanceState);
-        if (!detailFragment.isHidden()) {
-            savedInstanceState.putInt(KEY_PErSON_ID, selectedPersonId);
+        if (!commentFragment.isHidden()) {
+            savedInstanceState.putInt(KEY_PERSON_ID, selectedPersonId);
         }
     }
 
@@ -70,37 +70,37 @@ public class MainActivity extends Activity implements ClassListFragment.OnPerson
     public void onPersonSelected(int personId) {
         selectedPersonId = personId;
 
-        // If we're in multi-pane mode, show the detail pane if it isn't already visible.
-        if (multiPane && detailFragment.isHidden()) {
+        // If we're in multi-pane mode, show the comment pane if it isn't already visible.
+        if (multiPane && commentFragment.isHidden()) {
             fragmentManager
                     .beginTransaction()
-                    .show(detailFragment)
+                    .show(commentFragment)
                     .addToBackStack(null)
                     .commit();
         }
-        // If we're in single-pane mode, show the detail panel and hide the overview list.
+        // If we're in single-pane mode, show the comment panel and hide the class list.
         else if (!multiPane) {
             fragmentManager
                     .beginTransaction()
-                    .show(detailFragment)
-                    .hide(listFragment)
+                    .show(commentFragment)
+                    .hide(classListFragment)
                     .addToBackStack(null)
                     .commit();
         }
         // Show the current person.
-        ((CommentFragment) detailFragment).setRecipient(personId);
+        ((CommentFragment) commentFragment).setRecipient(personId);
     }
- 
+
     /**
      * Hides the {@link CommentFragment} when the user is finished saving, deleting, or mailing the
      * comment. Upon exiting the comment fragment, displays the given text as a {@link Toast} and
      * pops the last item off the back stack.
-     * 
+     *
      * @param message the message to display upon hiding (returning from) the
      *        {@link CommentFragment}
      */
     void hideCommentFragment(String message) {
-        fragmentManager.beginTransaction().show(listFragment).hide(detailFragment).commit();
+        fragmentManager.beginTransaction().show(classListFragment).hide(commentFragment).commit();
         fragmentManager.popBackStack();
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }

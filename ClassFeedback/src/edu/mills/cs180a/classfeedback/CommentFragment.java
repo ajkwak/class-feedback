@@ -10,7 +10,6 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -30,16 +29,13 @@ import android.widget.Toast;
  * @author cyu@mills.edu (Ching Yu)
  */
 public class CommentFragment extends Fragment {
-    private static final String TAG = "DetailFragment";
-    private MainActivity mActivity;
+    private EditText mCommentField;
     private Person mRecipient;
-    private EditText commentField;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_comment, container, false);
-        mActivity = (MainActivity) getActivity();
-        // Log.d(TAG, "mActivity = " + mActivity + ", commentField = " + commentField);
+        mCommentField = (EditText) view.findViewById(R.id.commentEditText);
         return view;
     }
 
@@ -52,42 +48,41 @@ public class CommentFragment extends Fragment {
         mRecipient = Person.everyone[personId];
 
         // Show a picture of the recipient.
-        ImageView icon = (ImageView) mActivity.findViewById(R.id.commentImageView);
+        ImageView icon = (ImageView) getView().findViewById(R.id.commentImageView);
         icon.setImageResource(mRecipient.getImageId());
 
         // Set the text of the comment EditText to the value of the current comment, if any.
         Comment comment = getCommentForRecipient(mRecipient.getEmail());
-        commentField = (EditText) mActivity.findViewById(R.id.commentEditText);
         if (comment != null && comment.getContent() != null) {
-            commentField.setText(comment.getContent());
+            mCommentField.setText(comment.getContent());
         } else {
-            commentField.setText("");
+            mCommentField.setText("");
         }
 
         // Add listeners.
-        Button saveButton = (Button) mActivity.findViewById(R.id.saveCommentButton);
+        Button saveButton = (Button) getView().findViewById(R.id.saveCommentButton);
         saveButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
                 saveCurrentComment();
             }
         });
-        Button cancelButton = (Button) mActivity.findViewById(R.id.cancelCommentButton);
+        Button cancelButton = (Button) getView().findViewById(R.id.cancelCommentButton);
         cancelButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
                 String cancelMessage = getString(R.string.comment_canceled_toast, mRecipient);
-                mActivity.hideCommentFragment(cancelMessage);
+                ((MainActivity) getActivity()).hideCommentFragment(cancelMessage);
             }
         });
-        Button clearTextButton = (Button) mActivity.findViewById(R.id.clearTextButton);
+        Button clearTextButton = (Button) getView().findViewById(R.id.clearTextButton);
         clearTextButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View arg0) {
-                commentField.setText("");
+                mCommentField.setText("");
             }
         });
-        Button deleteButton = (Button) mActivity.findViewById(R.id.deleteCommentButton);
+        Button deleteButton = (Button) getView().findViewById(R.id.deleteCommentButton);
         OnClickListener deleteHandler = new OnClickListener() {
             @Override
             public void onClick(View arg0) {
@@ -95,7 +90,7 @@ public class CommentFragment extends Fragment {
             }
         };
         deleteButton.setOnClickListener(deleteHandler);
-        Button mailButton = (Button) mActivity.findViewById(R.id.mailCommentButton);
+        Button mailButton = (Button) getView().findViewById(R.id.mailCommentButton);
         mailButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View arg0) {
@@ -107,25 +102,24 @@ public class CommentFragment extends Fragment {
 
     private void saveCurrentComment() {
         String recipientEmail = mRecipient.getEmail();
-        saveComment(recipientEmail, commentField.getText().toString());
+        saveComment(recipientEmail, mCommentField.getText().toString());
         String commentSavedMessage = getString(R.string.comment_altered_toast,
-                getString(R.string.added_text),
-                mRecipient);
-        mActivity.hideCommentFragment(commentSavedMessage);
+                getString(R.string.added_text), mRecipient);
+        ((MainActivity) getActivity()).hideCommentFragment(commentSavedMessage);
     }
 
     private void deleteComment() {
+        MainActivity activity = (MainActivity) getActivity();
         String email = mRecipient.getEmail();
         Uri uri = Uri.parse(CommentContentProvider.CONTENT_URI + "/" + email);
-        int rowsDeleted = mActivity.getContentResolver().delete(uri, null, null);
-        Log.d(TAG, "num rows deleted = " + rowsDeleted);
+        activity.getContentResolver().delete(uri, null, null);
         String commentDeletedMessage = getString(R.string.comment_altered_toast,
                 getString(R.string.deleted_text), mRecipient);
-        mActivity.hideCommentFragment(commentDeletedMessage);
+        activity.hideCommentFragment(commentDeletedMessage);
     }
 
     private AlertDialog createDeleteCommentDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(mActivity);
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setMessage(R.string.verify_delete_comment_text).setTitle(R.string.delete_button);
         builder.setPositiveButton(R.string.yes_button, new DialogInterface.OnClickListener() {
             @Override
@@ -148,18 +142,19 @@ public class CommentFragment extends Fragment {
         Intent emailIntent = new Intent(Intent.ACTION_SENDTO, Uri.fromParts("mailto", person
                 .getEmail(), null));
         emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Hello from " + getString(R.string.app_name));
-        emailIntent.putExtra(Intent.EXTRA_TEXT, commentField.getText());
+        emailIntent.putExtra(Intent.EXTRA_TEXT, mCommentField.getText());
         try {
             startActivity(Intent.createChooser(emailIntent, "Send Email"));
         } catch (ActivityNotFoundException e) {
-            Toast.makeText(mActivity, "There are no email clients installed.",
-                    Toast.LENGTH_SHORT).show();
+            Toast.makeText(getActivity(), "There are no email clients installed.",
+                    Toast.LENGTH_SHORT)
+                    .show();
         }
     }
 
     private Comment getCommentForRecipient(String recipient) {
         Uri uri = Uri.parse(CommentContentProvider.CONTENT_URI + "/" + recipient);
-        Cursor cursor = mActivity.getContentResolver().query(uri, null, null, null, null);
+        Cursor cursor = getActivity().getContentResolver().query(uri, null, null, null, null);
         Comment comment = null;
         if (cursor.moveToFirst()) {
             comment = new Comment(cursor.getLong(MySQLiteOpenHelper.COLUMN_ID_POS), cursor
@@ -172,7 +167,7 @@ public class CommentFragment extends Fragment {
     }
 
     private boolean saveComment(String recipient, String content) {
-        ContentResolver resolver = mActivity.getContentResolver();
+        ContentResolver resolver = getActivity().getContentResolver();
         Uri uri = Uri.parse(CommentContentProvider.CONTENT_URI + "/" + recipient);
         ContentValues values = new ContentValues();
         values.put(MySQLiteOpenHelper.COLUMN_RECIPIENT, recipient);
